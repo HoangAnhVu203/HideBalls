@@ -4,15 +4,9 @@ using UnityEngine;
 
 public class CanvasFail : UICanvas
 {
-    // Start is called before the first frame update
-    void Start()
+    public void RePlayBTN()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        LevelManager.Instance.Replay();
+        UIManager.Instance.CloseUIDirectly<CanvasFail>();
     }
 }

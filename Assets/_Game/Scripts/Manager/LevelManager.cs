@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,33 +8,31 @@ public class LevelManager : MonoBehaviour
     [Serializable]
     public class LevelEntry
     {
-        public string id;
-        public GameObject prefab;
+        public string id;         
+        public GameObject prefab;  
     }
 
     public static LevelManager Instance { get; private set; }
 
-    [Header("Danh sách level (kéo prefab vào)")]
+    [Header("Danh sách level (kéo prefab vào đây)")]
     public List<LevelEntry> levels = new List<LevelEntry>();
 
-    [Header("Nơi spawn level")]
+    [Header("Nơi spawn level (để trống = dùng chính GameObject này)")]
     public Transform levelRoot;
 
     [Header("Lưu tiến trình")]
-    public bool saveProgress = true;
-    public bool loopAtEnd = true;
-    public int defaultStartIndex = 2;   // level thật đầu tiên (ví dụ 2)
+    public bool saveProgress   = true;
+    public bool loopAtEnd      = true;
+    public int  defaultStartIndex = 0;       // level bắt đầu khi chưa có save
 
-    public const string PP_LEVEL_INDEX = "LUCKYBALL_LEVEL";
+    public const string PP_LEVEL_INDEX = "HIDEBALL_LEVEL";
 
-    public int CurrentIndex { get; private set; } = -1;
-    public GameObject CurrentLevelGO { get; private set; }
+    public int         CurrentIndex  { get; private set; } = -1;
+    public GameObject  CurrentLevelGO { get; private set; }
 
+    // GameManager sẽ subscribe vào đây
     public event Action<GameObject, int> OnLevelLoaded;
-    public event Action<int> OnLevelUnloaded;
-
-    [Header("Runtime Root (để clear rác mỗi level)")]
-    public Transform runtimeRoot;
+    public event Action<int>             OnLevelUnloaded;
 
     void Awake()
     {
@@ -44,25 +41,35 @@ public class LevelManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
 
-        if (!levelRoot) levelRoot = transform;
-
-        if (!runtimeRoot)
-        {
-            GameObject rt = new GameObject("__RuntimeRoot");
-            runtimeRoot = rt.transform;
-            runtimeRoot.SetParent(transform);
-        }
+        if (!levelRoot)
+            levelRoot = transform;
     }
 
-    // ❌ KHÔNG auto LoadLevel trong Start nữa
-    // GameManager sẽ quyết định load demo hay level đã lưu
-    void Start() { }
+    void Start()
+    {
+        if (levels.Count == 0)
+        {
+            Debug.LogError("[LevelManager] Chưa có level nào trong danh sách!");
+            return;
+        }
 
-    // ==========================
-    //       PUBLIC API 
-    // ==========================
+        // Xác định level bắt đầu
+        int startIndex = defaultStartIndex;
+
+        if (saveProgress && PlayerPrefs.HasKey(PP_LEVEL_INDEX))
+        {
+            startIndex = PlayerPrefs.GetInt(PP_LEVEL_INDEX, defaultStartIndex);
+        }
+
+        startIndex = Mathf.Clamp(startIndex, 0, levels.Count - 1);
+
+        LoadLevel(startIndex);
+    }
+
+    // ================== PUBLIC API ==================
 
     public void Replay()
     {
@@ -81,29 +88,31 @@ public class LevelManager : MonoBehaviour
             if (loopAtEnd)
             {
                 next = defaultStartIndex;
-                LoadLevel(next);
             }
             else
             {
-                UIManager.Instance.OpenUI<PanelEndGame>();
+                Debug.Log("[LevelManager] Đã tới level cuối, không load tiếp.");
+                return;
             }
-            return;
         }
 
         LoadLevel(next);
     }
 
-
     public void LoadLevelById(string id)
     {
         int index = levels.FindIndex(l => l.id == id);
-        if (index >= 0) LoadLevel(index);
-        else Debug.LogWarning($"[LevelManager] Không tìm thấy id = {id}");
+        if (index >= 0)
+        {
+            LoadLevel(index);
+        }
+        else
+        {
+            Debug.LogWarning($"[LevelManager] Không tìm thấy level có id = {id}");
+        }
     }
 
-    // ==========================
-    //         CORE LOAD
-    // ==========================
+    // ================== CORE LOAD ==================
 
     public void LoadLevel(int index)
     {
@@ -115,76 +124,40 @@ public class LevelManager : MonoBehaviour
 
         index = Mathf.Clamp(index, 0, levels.Count - 1);
 
-        // 1. Clear runtime object
-        ClearRuntime();
-
-        // 2. Destroy level cũ
-        if (CurrentLevelGO)
+        // 1. Huỷ level cũ
+        if (CurrentLevelGO != null)
         {
             OnLevelUnloaded?.Invoke(CurrentIndex);
             Destroy(CurrentLevelGO);
+            CurrentLevelGO = null;
         }
 
-        // 3. Spawn level mới
+        // 2. Spawn level mới
         LevelEntry entry = levels[index];
-        if (!entry.prefab)
+
+        if (entry.prefab == null)
         {
-            Debug.LogError($"[LevelManager] Prefab rỗng tại Level {index}");
+            Debug.LogError($"[LevelManager] Prefab rỗng tại level index {index}");
             return;
         }
 
         CurrentLevelGO = Instantiate(entry.prefab, levelRoot);
-        CurrentLevelGO.name = string.IsNullOrEmpty(entry.id) ? $"Level_{index}" : entry.id;
+        CurrentLevelGO.name = string.IsNullOrEmpty(entry.id)
+            ? $"Level_{index}"
+            : entry.id;
 
         CurrentIndex = index;
 
-        HintSystem.Instance?.HideHint();
-
-        // 4. Save progress (chỉ với level thật, bỏ qua demo < 2)
-        if (saveProgress && CurrentIndex >= 2)
+        // 3. Lưu tiến trình
+        if (saveProgress)
         {
             PlayerPrefs.SetInt(PP_LEVEL_INDEX, CurrentIndex);
             PlayerPrefs.Save();
         }
 
-        // 5. Thông báo GameManager reset gameplay
-        GameManager.Instance?.ResetForNewLevel();
-
+        // 4. Thông báo cho GameManager & các hệ thống khác
         OnLevelLoaded?.Invoke(CurrentLevelGO, CurrentIndex);
 
         Debug.Log($"[LevelManager] Loaded level index: {CurrentIndex}");
-
-        // Chỉ hiện text "Level X" cho level thật
-        if (CurrentIndex >= 2)
-        {
-            UIManager.Instance
-                .GetUI<CanvasGameplay>()?
-                .ShowLevel(CurrentIndex);
-        }
     }
-
-    // ==========================
-    //         CLEAR RUNTIME
-    // ==========================
-
-    public void ClearRuntime()
-    {
-        if (runtimeRoot)
-        {
-            for (int i = runtimeRoot.childCount - 1; i >= 0; i--)
-                Destroy(runtimeRoot.GetChild(i).gameObject);
-        }
-
-        var all = FindObjectsOfType<GameObject>();
-        foreach (var go in all)
-        {
-            if (!go || !go.activeInHierarchy) continue;
-
-            string n = go.name.ToLower();
-            if (n.Contains("bubble") || n.Contains("bombfragment") || n.Contains("debris"))
-                Destroy(go);
-        }
-    }
-
-    
 }

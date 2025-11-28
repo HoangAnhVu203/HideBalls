@@ -4,15 +4,8 @@ using UnityEngine;
 
 public class CanvasSetting : UICanvas
 {
-    // Start is called before the first frame update
-    void Start()
+    public void CloseBTN()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        UIManager.Instance.CloseUIDirectly<CanvasSetting>();
     }
 }

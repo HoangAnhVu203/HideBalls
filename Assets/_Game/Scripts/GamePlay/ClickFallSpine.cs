@@ -11,8 +11,9 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
     public SkeletonAnimation skeletonAnimation;     
 
     [Header("Màu sắc")]
-    public Color inactiveColor = new Color(0.7f, 0.7f, 0.7f, 1f); 
-    public Color activeColor   = new Color(0.2f, 0.8f, 0.2f, 1f); 
+    public Color inactiveColor = new Color(0.7f, 0.7f, 0.7f, 1f);  // xám lúc đầu
+    public Color activeColor   = new Color(0.2f, 0.8f, 0.2f, 1f);  // xanh lá khi click
+    public Color enemyHitColor = Color.black;                    // ĐEN khi trúng enemy
     public float colorLerpSpeed = 10f;
 
     [Header("Vật lý")]
@@ -20,28 +21,29 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
     public bool addRigidbodyIfMissing = true;
 
     [Header("Va chạm")]
-    [Tooltip("Chọn layer Enemy (bọ đen, hazard...)")]
+    [Tooltip("Layer Enemy (bọ đen, hazard...)")]
     public LayerMask enemyLayerMask;              
 
     Collider2D col;
     Rigidbody2D rb;
     bool clicked = false;
+    bool hasHitEnemy = false;    // tránh trigger nhiều lần
 
     void Awake()
     {
         col = GetComponent<Collider2D>();
 
-        // Tự tìm component Spine nếu chưa gán
+        // tự tìm Spine
         if (!skeletonAnimation)
             skeletonAnimation = GetComponent<SkeletonAnimation>();
 
         rb = GetComponent<Rigidbody2D>();
 
-        // Ban đầu: chỉ để click, chưa va chạm vật lý
+        // Ban đầu: chỉ click, chưa physics
         if (col)
             col.isTrigger = true;
 
-        // Set màu xám lúc đầu
+        // Màu xám ban đầu
         SetSpineColor(inactiveColor);
 
         // Tắt physics ban đầu
@@ -52,36 +54,37 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // Dùng khi không có EventSystem 
+    // TEST PC
     void OnMouseDown()
     {
         TryActivate();
     }
 
-    // Dùng khi có EventSystem + Physics2DRaycaster
+    // MOBILE / EventSystem
     public void OnPointerClick(PointerEventData eventData)
     {
         TryActivate();
     }
 
+    // ================== CLICK ĐỂ RƠI ==================
     void TryActivate()
     {
         if (clicked) return;
         clicked = true;
 
-        // Tắt trigger để va chạm
+        // bật collider thật
         if (col != null)
             col.isTrigger = false;
 
-        // Đổi màu xám -> xanh lá
+        // đổi màu xám -> xanh
         StopAllCoroutines();
         StartCoroutine(LerpSpineColor(inactiveColor, activeColor));
 
-
+        // add rigid nếu thiếu
         if (!rb && addRigidbodyIfMissing)
             rb = gameObject.AddComponent<Rigidbody2D>();
 
-        // Bật physics
+        // bật physics
         if (rb)
         {
             rb.simulated = true;
@@ -91,14 +94,51 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
         Debug.Log("[ClickFallSpine] Activated: " + name);
     }
 
-    // ================== HÀM HỖ TRỢ SPINE ==================
+    // ================== BALL VA CHẠM ENEMY => THUA ==================
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (IsEnemyLayer(collision.collider.gameObject.layer))
+        {
+            HandleHitEnemy(collision.collider.gameObject);
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (IsEnemyLayer(other.gameObject.layer))
+        {
+            HandleHitEnemy(other.gameObject);
+        }
+    }
+
+    void HandleHitEnemy(GameObject enemy)
+    {
+        if (hasHitEnemy) return;
+        hasHitEnemy = true;
+
+        // đổi màu sang đen
+        StopAllCoroutines();
+        SetSpineColor(enemyHitColor);
+
+        Debug.Log("[ClickFallSpine] Hit Enemy: " + enemy.name);
+
+        // báo GameManager xử thua
+        GameManager.Instance?.OnBallHitEnemy();
+    }
+
+    bool IsEnemyLayer(int layer)
+    {
+        return ((1 << layer) & enemyLayerMask) != 0;
+    }
+
+    // ================== SPINE COLOR ==================
     void SetSpineColor(Color c)
     {
         if (skeletonAnimation != null && skeletonAnimation.Skeleton != null)
         {
             skeletonAnimation.Skeleton.SetColor(c);
-            skeletonAnimation.LateUpdate(); 
+            skeletonAnimation.LateUpdate();
         }
     }
 
@@ -114,35 +154,5 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
         }
 
         SetSpineColor(to);
-    }
-
-    // ================== VA CHẠM VỚI ENEMY ==================
-
-    // Nếu collider của block là non-trigger sau khi rơi
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (IsEnemyLayer(collision.collider.gameObject.layer))
-        {
-            // Đổi màu sang đen khi chạm enemy
-            StopAllCoroutines();
-            SetSpineColor(Color.black);
-            Debug.Log("[ClickFallSpine] Hit Enemy (Collision): " + collision.collider.name);
-        }
-    }
-
-    // dùng trigger cho enemy
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (IsEnemyLayer(other.gameObject.layer))
-        {
-            StopAllCoroutines();
-            SetSpineColor(Color.black);
-            Debug.Log("[ClickFallSpine] Hit Enemy (Trigger): " + other.name);
-        }
-    }
-
-    bool IsEnemyLayer(int layer)
-    {
-        return ((1 << layer) & enemyLayerMask) != 0;
     }
 }

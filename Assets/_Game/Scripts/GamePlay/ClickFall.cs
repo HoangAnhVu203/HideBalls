@@ -2,37 +2,24 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[DisallowMultipleComponent]
 [RequireComponent(typeof(Collider2D))]
 public class ClickFall : MonoBehaviour, IPointerClickHandler
 {
-    [Header("ShowOut")]
+    [Header("Hiển thị (optional)")]
     public SpriteRenderer spriteRenderer;
-    [Range(0f, 1f)] public float maxAlpha = 1f;
+    [Range(0f, 1f)] public float maxAlpha = 1f;   
     public float fadeSpeed = 10f;
 
-    [Header("Physic")]
+    [Header("Vật lý")]
     public float gravityScale = 1f;
     public bool addRigidbodyIfMissing = true;
 
-    [Header("Click 2 times")]
-    public float jumpForce = 3f;     
-    public float shrinkDuration = 0.3f; 
-    public bool fadeOutOnShrink = true; 
-
-    Collider2D col;
+    Collider2D  col;
     Rigidbody2D rb;
 
-    enum State
-    {
-        Idle,       
-        Fallen,    
-        Jumping,    
-        Popping     
-    }
-
-    State state = State.Idle;
-    bool destroyStarted = false;
-    Vector3 originalScale;
+    bool hasFallen   = false;  // đã bắt đầu rơi chưa
+    bool hasNotified = false;  // đã báo GameManager chưa
 
     void Awake()
     {
@@ -43,17 +30,21 @@ public class ClickFall : MonoBehaviour, IPointerClickHandler
 
         rb = GetComponent<Rigidbody2D>();
 
-        if (col)
+        // Ban đầu: chỉ để click (trigger), chưa chịu gravity
+        if (col != null)
             col.isTrigger = true;
 
-        originalScale = transform.localScale;
+        if (rb != null)
+            rb.simulated = false;
     }
 
+    // Cho test trên PC/mac không cần EventSystem
     void OnMouseDown()
     {
         HandleClick();
     }
 
+    // Cho mobile / UI EventSystem + Physics2DRaycaster
     public void OnPointerClick(PointerEventData eventData)
     {
         HandleClick();
@@ -61,96 +52,45 @@ public class ClickFall : MonoBehaviour, IPointerClickHandler
 
     void HandleClick()
     {
-        switch (state)
+        // nếu đã rơi rồi thì bỏ qua
+        if (hasFallen) return;
+
+        // Nếu có GameManager và game không ở Gameplay thì không cho click
+        if (GameManager.Instance != null &&
+            GameManager.Instance.CurrentState != GameManager.GameState.Gameplay)
         {
-            case State.Idle:
-                ActivateFall();   
-                break;
-
-            case State.Fallen:
-                StartJump();     
-                break;
-
-            case State.Jumping:
-            case State.Popping:
-                break;
+            return;
         }
-    }
 
-    void ActivateFall()
-    {
-        state = State.Fallen;
+        hasFallen = true;
 
+        // tắt trigger để khối va chạm thật
         if (col != null)
             col.isTrigger = false;
 
-        if (spriteRenderer)
+        // hiệu ứng alpha (tuỳ bạn có dùng hay không)
+        if (spriteRenderer != null)
             StartCoroutine(FadeToAlpha(spriteRenderer.color.a, maxAlpha));
-        if (!rb && addRigidbodyIfMissing)
+
+        // thêm Rigidbody nếu thiếu
+        if (rb == null && addRigidbodyIfMissing)
             rb = gameObject.AddComponent<Rigidbody2D>();
 
-        if (rb)
+        // bật physics
+        if (rb != null)
         {
-            rb.simulated = true;
+            rb.simulated   = true;
             rb.gravityScale = gravityScale;
         }
 
-        Debug.Log("[ClickFall] Activated fall: " + name);
-    }
-
-    void StartJump()
-    {
-        if (state != State.Fallen || rb == null) return;
-
-        state = State.Jumping;
-
-        rb.velocity = new Vector2(rb.velocity.x, 0f);
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-
-        Debug.Log("[ClickFall] Start jump: " + name);
-    }
-
-    
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (state == State.Jumping && !destroyStarted)
+        // Báo cho GameManager: khối này đã bắt đầu rơi
+        if (!hasNotified)
         {
-            destroyStarted = true;
-            state = State.Popping;
-            StartCoroutine(ShrinkAndDestroy());
-        }
-    }
-
-    IEnumerator ShrinkAndDestroy()
-    {
-
-        if (col)
-            col.enabled = false;
-
-        float t = 0f;
-        Vector3 startScale = transform.localScale;
-
-        Color startColor = Color.white;
-        if (spriteRenderer)
-            startColor = spriteRenderer.color;
-
-        while (t < 1f)
-        {
-            t += Time.deltaTime / shrinkDuration;
-
-            transform.localScale = Vector3.Lerp(startScale, Vector3.zero, t);
-
-            if (fadeOutOnShrink && spriteRenderer)
-            {
-                Color c = startColor;
-                c.a = Mathf.Lerp(startColor.a, 0f, t);
-                spriteRenderer.color = c;
-            }
-
-            yield return null;
+            hasNotified = true;
+            GameManager.Instance?.NotifyBlockFallen(this);
         }
 
-        Destroy(gameObject);
+        Debug.Log("[ClickFall] FALL: " + name);
     }
 
     IEnumerator FadeToAlpha(float from, float to)
@@ -161,7 +101,7 @@ public class ClickFall : MonoBehaviour, IPointerClickHandler
             t += Time.deltaTime * fadeSpeed;
             float a = Mathf.Lerp(from, to, t);
 
-            if (spriteRenderer)
+            if (spriteRenderer != null)
             {
                 var c = spriteRenderer.color;
                 c.a = a;

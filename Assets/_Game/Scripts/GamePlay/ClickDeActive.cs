@@ -2,23 +2,25 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[DisallowMultipleComponent]
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 {
-    [Header("Jump")]
+    [Header("Jump (one click only)")]
     public float jumpForce = 5f;
     public float delayBeforeDisappear = 0.1f;
 
     [Header("Ground")]
+    [Tooltip("Layer được coi là mặt đất. Để None = va chạm với bất kỳ collider nào cũng tính là mặt đất.")]
     public LayerMask groundLayer;
 
     Rigidbody2D rb;
     Collider2D col;
 
-    bool hasClicked = false;     
-    bool isJumping = false;      
-    bool isDisappearing = false; 
+    bool hasClicked = false;
+    bool isJumping = false;
+    bool isDisappearing = false;
 
     void Awake()
     {
@@ -28,7 +30,6 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
         rb.simulated = true;
         rb.gravityScale = rb.gravityScale <= 0 ? 1f : rb.gravityScale;
     }
-
 
     void OnMouseDown()
     {
@@ -42,7 +43,7 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 
     void HandleClick()
     {
-        if (hasClicked) return;  
+        if (hasClicked) return;  // chỉ cho nhảy một lần
 
         hasClicked = true;
         isJumping = true;
@@ -50,7 +51,7 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
         rb.velocity = new Vector2(rb.velocity.x, 0f);
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
 
-        Debug.Log("[ClickJumpDisappear] Jump: " + name);
+        Debug.Log("[ClickDeActive] Jump: " + name);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -61,6 +62,7 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 
         if (groundLayer == 0)
         {
+            // Không set layer → mọi va chạm đều coi là mặt đất
             isGroundHit = true;
         }
         else
@@ -72,7 +74,7 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 
         if (isGroundHit)
         {
-            Debug.Log("[ClickJumpDisappear] Landed on ground, will disappear: " + name);
+            Debug.Log("[ClickDeActive] Landed on ground, will disappear: " + name);
             StartDisappear();
         }
     }

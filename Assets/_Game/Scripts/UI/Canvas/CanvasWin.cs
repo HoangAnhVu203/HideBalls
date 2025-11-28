@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class CanvasWin : UICanvas
 {
-    // Start is called before the first frame update
-    void Start()
+    public void NextLVBTN()
     {
-        
+        LevelManager.Instance.NextLevel();
+        UIManager.Instance.CloseUIDirectly<CanvasWin>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ReplayBTn()
     {
-        
+        LevelManager.Instance.Replay();
+        UIManager.Instance.CloseUIDirectly<CanvasWin>();
     }
 }
