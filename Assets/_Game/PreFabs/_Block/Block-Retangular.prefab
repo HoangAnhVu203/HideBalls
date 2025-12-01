@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 374656028115226628}
   - component: {fileID: 2266645535934929239}
   - component: {fileID: 924186477919304538}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Block-Retangular
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -148,6 +148,3 @@ MonoBehaviour:
   fadeSpeed: 10
   gravityScale: 1
   addRigidbodyIfMissing: 1
-  jumpForce: 3
-  shrinkDuration: 0.3
-  fadeOutOnShrink: 1

@@ -8,8 +8,8 @@ public class LevelManager : MonoBehaviour
     [Serializable]
     public class LevelEntry
     {
-        public string id;         
-        public GameObject prefab;  
+        public string id;          // ID level (dùng cho LoadLevelById)
+        public GameObject prefab;  // Prefab level
     }
 
     public static LevelManager Instance { get; private set; }
@@ -21,14 +21,18 @@ public class LevelManager : MonoBehaviour
     public Transform levelRoot;
 
     [Header("Lưu tiến trình")]
-    public bool saveProgress   = true;
-    public bool loopAtEnd      = true;
+    public bool saveProgress      = true;
+    public bool loopAtEnd         = true;
     public int  defaultStartIndex = 0;       // level bắt đầu khi chưa có save
 
     public const string PP_LEVEL_INDEX = "HIDEBALL_LEVEL";
 
-    public int         CurrentIndex  { get; private set; } = -1;
-    public GameObject  CurrentLevelGO { get; private set; }
+    public int        CurrentIndex   { get; private set; } = -1;
+    public GameObject CurrentLevelGO { get; private set; }
+
+    // ================== RUNTIME ROOT CHO VFX / LASER ==================
+    [Header("Runtime Root (parent cho VFX, debris, laser explosion, ...)")]
+    public Transform runtimeRoot;    // Laser sẽ gán explosion/smoke vào đây
 
     // GameManager sẽ subscribe vào đây
     public event Action<GameObject, int> OnLevelLoaded;
@@ -46,6 +50,15 @@ public class LevelManager : MonoBehaviour
 
         if (!levelRoot)
             levelRoot = transform;
+
+        // Tạo runtimeRoot nếu chưa có
+        if (!runtimeRoot)
+        {
+            GameObject rt = new GameObject("__RuntimeRoot");
+            runtimeRoot = rt.transform;
+            runtimeRoot.SetParent(transform);
+            runtimeRoot.localPosition = Vector3.zero;
+        }
     }
 
     void Start()
@@ -124,6 +137,9 @@ public class LevelManager : MonoBehaviour
 
         index = Mathf.Clamp(index, 0, levels.Count - 1);
 
+        // 0. Clear mọi VFX runtime (laser explosion, smoke, debris, ...)
+        ClearRuntime();
+
         // 1. Huỷ level cũ
         if (CurrentLevelGO != null)
         {
@@ -159,5 +175,24 @@ public class LevelManager : MonoBehaviour
         OnLevelLoaded?.Invoke(CurrentLevelGO, CurrentIndex);
 
         Debug.Log($"[LevelManager] Loaded level index: {CurrentIndex}");
+    }
+
+    // ================== RUNTIME CLEANUP ==================
+
+    /// <summary>
+    /// Huỷ toàn bộ object con của runtimeRoot (VFX tạm, explosion, smoke,...)
+    /// </summary>
+    public void ClearRuntime()
+    {
+        if (runtimeRoot)
+        {
+            for (int i = runtimeRoot.childCount - 1; i >= 0; i--)
+            {
+                Destroy(runtimeRoot.GetChild(i).gameObject);
+            }
+        }
+
+        // (tuỳ chọn) Nếu sau này bạn còn VFX không parent vào runtimeRoot
+        // có thể lọc theo tag/name tại đây.
     }
 }
