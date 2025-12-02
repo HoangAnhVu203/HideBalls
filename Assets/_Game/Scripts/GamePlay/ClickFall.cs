@@ -6,20 +6,22 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(Collider2D))]
 public class ClickFall : MonoBehaviour, IPointerClickHandler
 {
-    [Header("Hiển thị (optional)")]
+    [Header("Hiển thị")]
     public SpriteRenderer spriteRenderer;
-    [Range(0f, 1f)] public float maxAlpha = 1f;   
-    public float fadeSpeed = 10f;
+    public Color activeColor = new Color(0.2f, 0.85f, 0.2f, 1f);   // xanh lá
+    [Range(0f, 1f)] public float startAlpha = 0.3f;               // alpha ban đầu
+    [Range(0f, 1f)] public float maxAlpha   = 1f;                 // alpha khi click
+    public float fadeSpeed = 8f;
 
     [Header("Vật lý")]
     public float gravityScale = 1f;
     public bool addRigidbodyIfMissing = true;
 
-    Collider2D  col;
+    Collider2D col;
     Rigidbody2D rb;
 
-    bool hasFallen   = false;  // đã bắt đầu rơi chưa
-    bool hasNotified = false;  // đã báo GameManager chưa
+    bool hasFallen   = false;
+    bool hasNotified = false;
 
     void Awake()
     {
@@ -30,21 +32,27 @@ public class ClickFall : MonoBehaviour, IPointerClickHandler
 
         rb = GetComponent<Rigidbody2D>();
 
-        // Ban đầu: chỉ để click (trigger), chưa chịu gravity
-        if (col != null)
-            col.isTrigger = true;
+        // ========== TRẠNG THÁI BAN ĐẦU ==========
+        if (col) col.isTrigger = true;
+        if (rb)  rb.simulated = false;
 
-        if (rb != null)
-            rb.simulated = false;
+        // set alpha mờ lúc đầu
+        if (spriteRenderer)
+        {
+            var c = spriteRenderer.color;
+            c.a = startAlpha;
+            spriteRenderer.color = c;
+        }
     }
 
-    // Cho test trên PC/mac không cần EventSystem
+#if UNITY_EDITOR || UNITY_STANDALONE
     void OnMouseDown()
     {
         HandleClick();
     }
+#endif
 
-    // Cho mobile / UI EventSystem + Physics2DRaycaster
+    // Mobile + EventSystem + Physics2DRaycaster
     public void OnPointerClick(PointerEventData eventData)
     {
         HandleClick();
@@ -52,38 +60,37 @@ public class ClickFall : MonoBehaviour, IPointerClickHandler
 
     void HandleClick()
     {
-        // nếu đã rơi rồi thì bỏ qua
         if (hasFallen) return;
 
-        // Nếu có GameManager và game không ở Gameplay thì không cho click
+        // chỉ cho click khi đang gameplay
         if (GameManager.Instance != null &&
             GameManager.Instance.CurrentState != GameManager.GameState.Gameplay)
-        {
             return;
-        }
 
         hasFallen = true;
 
-        // tắt trigger để khối va chạm thật
-        if (col != null)
-            col.isTrigger = false;
+        // cho va chạm vật lý thật
+        if (col) col.isTrigger = false;
 
-        // hiệu ứng alpha (tuỳ bạn có dùng hay không)
-        if (spriteRenderer != null)
+        // đổi màu sang xanh
+        if (spriteRenderer)
+        {
+            spriteRenderer.color = new Color(activeColor.r, activeColor.g, activeColor.b, spriteRenderer.color.a);
             StartCoroutine(FadeToAlpha(spriteRenderer.color.a, maxAlpha));
+        }
 
-        // thêm Rigidbody nếu thiếu
-        if (rb == null && addRigidbodyIfMissing)
+        // thêm Rigidbody
+        if (!rb && addRigidbodyIfMissing)
             rb = gameObject.AddComponent<Rigidbody2D>();
 
-        // bật physics
-        if (rb != null)
+        // bật vật lý
+        if (rb)
         {
-            rb.simulated   = true;
+            rb.simulated = true;
             rb.gravityScale = gravityScale;
         }
 
-        // Báo cho GameManager: khối này đã bắt đầu rơi
+        // báo GameManager
         if (!hasNotified)
         {
             hasNotified = true;
@@ -101,7 +108,7 @@ public class ClickFall : MonoBehaviour, IPointerClickHandler
             t += Time.deltaTime * fadeSpeed;
             float a = Mathf.Lerp(from, to, t);
 
-            if (spriteRenderer != null)
+            if (spriteRenderer)
             {
                 var c = spriteRenderer.color;
                 c.a = a;
