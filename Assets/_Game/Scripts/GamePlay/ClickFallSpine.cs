@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using Spine;
 using Spine.Unity;
+using CandyCoded.HapticFeedback;
 
 [RequireComponent(typeof(Collider2D))]
 public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
@@ -71,6 +72,9 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
     {
         if (clicked) return;
         clicked = true;
+
+        AudioManager.Instance?.PlayClickSpine();
+        HapticFeedback.LightFeedback();
 
         // bật collider thật
         if (col != null)
@@ -154,5 +158,10 @@ public class ClickFallSpine : MonoBehaviour, IPointerClickHandler
         }
 
         SetSpineColor(to);
+    }
+
+    public void DemoClick()
+    {
+        TryActivate();
     }
 }

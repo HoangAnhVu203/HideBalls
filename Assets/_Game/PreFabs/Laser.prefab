@@ -5005,7 +5005,7 @@ MonoBehaviour:
   lazerAudio: {fileID: 6262081346734465111}
   hitMask:
     serializedVersion: 2
-    m_Bits: 4552
+    m_Bits: 200
   maxDistance: 20
   selfOffset: 0.08
   useMainStartSpeed: 1

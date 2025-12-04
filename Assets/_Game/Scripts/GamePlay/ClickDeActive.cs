@@ -1,18 +1,16 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using CandyCoded.HapticFeedback;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 {
-    [Header("Jump (one click only)")]
     public float jumpForce = 5f;
     public float delayBeforeDisappear = 0.1f;
 
-    [Header("Ground")]
-    [Tooltip("Layer được coi là mặt đất. Để None = va chạm với bất kỳ collider nào cũng tính là mặt đất.")]
     public LayerMask groundLayer;
 
     Rigidbody2D rb;
@@ -34,6 +32,9 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
     void OnMouseDown()
     {
         HandleClick();
+        AudioManager.Instance?.PlayClickBlock();
+
+        HapticFeedback.LightFeedback();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -43,7 +44,7 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 
     void HandleClick()
     {
-        if (hasClicked) return;  // chỉ cho nhảy một lần
+        if (hasClicked) return; 
 
         hasClicked = true;
         isJumping = true;
@@ -62,7 +63,6 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 
         if (groundLayer == 0)
         {
-            // Không set layer → mọi va chạm đều coi là mặt đất
             isGroundHit = true;
         }
         else
@@ -74,7 +74,6 @@ public class ClickDeActive : MonoBehaviour, IPointerClickHandler
 
         if (isGroundHit)
         {
-            Debug.Log("[ClickDeActive] Landed on ground, will disappear: " + name);
             StartDisappear();
         }
     }

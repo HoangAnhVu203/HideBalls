@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1323730078549966969}
   - component: {fileID: 3001221664313378302}
-  - component: {fileID: 4398555131055172102}
-  - component: {fileID: 6153745745604453505}
+  - component: {fileID: 4004377078300688423}
+  - component: {fileID: 9001027581420799198}
   m_Layer: 7
   m_Name: Block - L
   m_TagString: Untagged
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 27a3a19fe2f4446ada047ca189be2e15, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2bd8e66e53aaf4e03aaeff030ba633f1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 0.3764706}
   m_FlipX: 0
   m_FlipY: 0
@@ -86,7 +86,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!60 &4398555131055172102
+--- !u!60 &4004377078300688423
 PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,7 +122,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 5, y: 5}
+    oldSize: {x: 10, y: 4}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -130,22 +130,18 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 1.610226, y: 0.24576259}
-      - {x: 1.6110924, y: 0.623741}
-      - {x: 1.5350616, y: 0.68124145}
-      - {x: -1.5143514, y: 0.66354233}
-      - {x: -1.6192703, y: 0.57687265}
-      - {x: -1.6108339, y: -0.44093725}
-      - {x: -1.6079065, y: -0.6072026}
-      - {x: -1.5340064, y: -0.6624475}
-      - {x: -1.1125919, y: -0.65554696}
-      - {x: -1.048853, y: -0.55833393}
-      - {x: -1.0524462, y: 0.17458305}
-      - {x: -0.1872288, y: 0.17632781}
-      - {x: 1.3207375, y: 0.18911104}
-      - {x: 1.5577484, y: 0.19552474}
+    - - {x: -3.1699998, y: 1.55}
+      - {x: -3.3, y: 1.49}
+      - {x: -3.3, y: 0.52}
+      - {x: -3.23, y: 0.42999998}
+      - {x: 2.198598, y: 0.436499}
+      - {x: 2.24, y: -1.56}
+      - {x: 3.23, y: -1.56}
+      - {x: 3.31, y: -1.5}
+      - {x: 3.31, y: 1.4699999}
+      - {x: 3.1999998, y: 1.55}
   m_UseDelaunayMesh: 0
---- !u!114 &6153745745604453505
+--- !u!114 &9001027581420799198
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -157,8 +153,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f30d8a0d45f84201b55173bd66a99fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 3001221664313378302}
+  spriteRenderer: {fileID: 0}
+  activeColor: {r: 0.2, g: 0.85, b: 0.2, a: 1}
+  startAlpha: 0.3
   maxAlpha: 1
-  fadeSpeed: 10
+  fadeSpeed: 8
   gravityScale: 1
   addRigidbodyIfMissing: 1

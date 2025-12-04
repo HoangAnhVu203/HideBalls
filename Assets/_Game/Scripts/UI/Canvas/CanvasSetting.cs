@@ -6,6 +6,7 @@ public class CanvasSetting : UICanvas
 {
     public void CloseBTN()
     {
+        AudioManager.Instance?.PlayButton();
         UIManager.Instance.CloseUIDirectly<CanvasSetting>();
     }
 }

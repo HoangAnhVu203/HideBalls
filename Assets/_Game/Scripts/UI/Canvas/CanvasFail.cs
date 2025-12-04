@@ -6,6 +6,7 @@ public class CanvasFail : UICanvas
 {
     public void RePlayBTN()
     {
+        AudioManager.Instance?.PlayButton();
         LevelManager.Instance.Replay();
         UIManager.Instance.CloseUIDirectly<CanvasFail>();
     }

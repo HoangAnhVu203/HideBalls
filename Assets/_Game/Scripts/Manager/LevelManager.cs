@@ -23,7 +23,7 @@ public class LevelManager : MonoBehaviour
     [Header("Lưu tiến trình")]
     public bool saveProgress      = true;
     public bool loopAtEnd         = true;
-    public int  defaultStartIndex = 0;       // level bắt đầu khi chưa có save
+    public int  defaultStartIndex = 0;       
 
     public const string PP_LEVEL_INDEX = "HIDEBALL_LEVEL";
 
@@ -69,18 +69,27 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        // Xác định level bắt đầu
         int startIndex = defaultStartIndex;
 
-        if (saveProgress && PlayerPrefs.HasKey(PP_LEVEL_INDEX))
+        if (saveProgress)
         {
-            startIndex = PlayerPrefs.GetInt(PP_LEVEL_INDEX, defaultStartIndex);
+            if (PlayerPrefs.HasKey(PP_LEVEL_INDEX))
+            {
+                startIndex = PlayerPrefs.GetInt(PP_LEVEL_INDEX, defaultStartIndex);
+            }
+        }
+        else
+        {
+            // Không dùng saveProgress → coi như reset về demo
+            PlayerPrefs.DeleteKey(PP_LEVEL_INDEX);
+            PlayerPrefs.Save();
+            startIndex = 0;   // luôn bắt đầu từ level demo
         }
 
         startIndex = Mathf.Clamp(startIndex, 0, levels.Count - 1);
-
         LoadLevel(startIndex);
     }
+
 
     // ================== PUBLIC API ==================
 
@@ -101,12 +110,13 @@ public class LevelManager : MonoBehaviour
             if (loopAtEnd)
             {
                 next = defaultStartIndex;
+                LoadLevel(next);
             }
             else
             {
-                Debug.Log("[LevelManager] Đã tới level cuối, không load tiếp.");
-                return;
+                UIManager.Instance.OpenUI<PanelEndGame>();
             }
+            return;
         }
 
         LoadLevel(next);
@@ -175,6 +185,8 @@ public class LevelManager : MonoBehaviour
         OnLevelLoaded?.Invoke(CurrentLevelGO, CurrentIndex);
 
         Debug.Log($"[LevelManager] Loaded level index: {CurrentIndex}");
+
+        HintSystem.Instance?.HideHint();
     }
 
     // ================== RUNTIME CLEANUP ==================

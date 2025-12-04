@@ -217,6 +217,7 @@ GameObject:
   m_Component:
   - component: {fileID: 993731264745893670}
   - component: {fileID: 5349221000096663093}
+  - component: {fileID: 4550124749847242215}
   m_Layer: 5
   m_Name: Toggle
   m_TagString: Untagged
@@ -291,6 +292,26 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!114 &4550124749847242215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4030743078669890590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc30c96a9283b42bdaff5e07f3089eb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settingType: 0
+  toggle: {fileID: 5349221000096663093}
+  checkmark: {fileID: 497377374444515411}
+  background: {fileID: 6457034313910934701}
+  leftPos: {x: -30, y: 0}
+  rightPos: {x: 200, y: 0}
+  onColor: {r: 0, g: 1, b: 0, a: 1}
+  offColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &5130689813841930872
 GameObject:
   m_ObjectHideFlags: 0

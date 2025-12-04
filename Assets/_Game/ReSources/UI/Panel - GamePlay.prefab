@@ -516,9 +516,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 693810391504411999}
-        m_TargetAssemblyTypeName: CanvasGamePlay, Assembly-CSharp
-        m_MethodName: HintBTN
+      - m_Target: {fileID: 5039961309513371744}
+        m_TargetAssemblyTypeName: HintSystem, Assembly-CSharp
+        m_MethodName: TryUseHint
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -616,6 +616,7 @@ GameObject:
   - component: {fileID: 5615928921647674211}
   - component: {fileID: 3545677346240178230}
   - component: {fileID: 693810391504411999}
+  - component: {fileID: 5039961309513371744}
   m_Layer: 5
   m_Name: Panel - GamePlay
   m_TagString: Untagged
@@ -701,6 +702,32 @@ MonoBehaviour:
   ImgLV: {fileID: 5774211910000092224}
   levelText: {fileID: 2462531477507795588}
   showTime: 3
+  nextLvButton: {fileID: 3444701054731525772}
+  nextWaitTime: 15
+  nextScaleUp: 1.2
+  nextScaleDuration: 0.3
+  hintButton: {fileID: 1693149912525550972}
+  hintWaitTime: 7
+  hintScaleUp: 1.2
+  hintScaleDuration: 0.3
+--- !u!114 &5039961309513371744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6802842168640761338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb74ffb0d0dd744d68086c914d38f5c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHintsPerLevel: 1000
+  handPrefab: {fileID: 3407126705031652374, guid: 661a86bd23e154a2daad8e71e6af243c, type: 3}
+  handParentOverride: {fileID: 3009052682443427922}
+  waypointRootName: Hint
+  handMoveSpeed: 3
+  handLoop: 1
 --- !u!1 &7718252175886419809
 GameObject:
   m_ObjectHideFlags: 0

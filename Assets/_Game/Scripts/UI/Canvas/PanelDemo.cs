@@ -4,15 +4,9 @@ using UnityEngine;
 
 public class PanelDemo : UICanvas
 {
-    // Start is called before the first frame update
-    void Start()
+    public void OnClickPlay()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        AudioManager.Instance?.PlayButton();
+        GameManager.Instance.StartRealGame();
     }
 }
