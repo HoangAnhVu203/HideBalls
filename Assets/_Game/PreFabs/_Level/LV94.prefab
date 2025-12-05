@@ -334,7 +334,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 4075252677929275236}
   maxAlpha: 1
   fadeSpeed: 10
-  activeColor: {r: 0.33459416, g: 0.9716981, b: 0.33459416, a: 1}
+  activeColor: {r: 0.98039216, g: 0.5803922, b: 0.22352941, a: 1}
   gravityScale: 1
   addRigidbodyIfMissing: 1
   highlightObject: {fileID: 0}
@@ -562,7 +562,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 6745914116637768456}
   maxAlpha: 1
   fadeSpeed: 10
-  activeColor: {r: 0.33459416, g: 0.9716981, b: 0.33459416, a: 1}
+  activeColor: {r: 0.98039216, g: 0.5803922, b: 0.22352941, a: 1}
   gravityScale: 1
   addRigidbodyIfMissing: 1
   highlightObject: {fileID: 0}
@@ -725,7 +725,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 11839993386366394}
   maxAlpha: 1
   fadeSpeed: 10
-  activeColor: {r: 0.33459416, g: 0.9716981, b: 0.33459416, a: 1}
+  activeColor: {r: 0.98039216, g: 0.5803922, b: 0.22352941, a: 1}
   gravityScale: 1
   addRigidbodyIfMissing: 1
   highlightObject: {fileID: 0}
@@ -1368,7 +1368,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 8114097266849812282}
   maxAlpha: 1
   fadeSpeed: 10
-  activeColor: {r: 0.33459416, g: 0.9716981, b: 0.33459416, a: 1}
+  activeColor: {r: 0.98039216, g: 0.5803922, b: 0.22352941, a: 1}
   gravityScale: 1
   addRigidbodyIfMissing: 1
   highlightObject: {fileID: 0}

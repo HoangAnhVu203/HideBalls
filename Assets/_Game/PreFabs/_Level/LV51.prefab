@@ -817,12 +817,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 1796078400460694375}
     m_Modifications:
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1722
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.595
+      value: 0.604
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.832
+      value: -1.482
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.z
@@ -937,7 +945,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8f749e7513f414592fd10d3908945b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 5
+  jumpForce: 3
   delayBeforeDisappear: 0.1
   groundLayer:
     serializedVersion: 2
@@ -951,12 +959,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 1796078400460694375}
     m_Modifications:
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1722
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.595
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.599
+      value: -1.805
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1071,7 +1087,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8f749e7513f414592fd10d3908945b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 5
+  jumpForce: 3
   delayBeforeDisappear: 0.1
   groundLayer:
     serializedVersion: 2
@@ -1102,7 +1118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1370238806865370652, guid: 9d2c7b42db8bc4fb48ffa28ade511f42, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.15
+      value: 0.1992835
       objectReference: {fileID: 0}
     - target: {fileID: 1370238806865370652, guid: 9d2c7b42db8bc4fb48ffa28ade511f42, type: 3}
       propertyPath: m_LocalScale.y
@@ -1110,11 +1126,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1370238806865370652, guid: 9d2c7b42db8bc4fb48ffa28ade511f42, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.02
+      value: -0.0103
       objectReference: {fileID: 0}
     - target: {fileID: 1370238806865370652, guid: 9d2c7b42db8bc4fb48ffa28ade511f42, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.259
+      value: -1.163
       objectReference: {fileID: 0}
     - target: {fileID: 1370238806865370652, guid: 9d2c7b42db8bc4fb48ffa28ade511f42, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1417,12 +1433,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 1796078400460694375}
     m_Modifications:
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1722
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.611
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.599
+      value: -1.829
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1537,7 +1561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8f749e7513f414592fd10d3908945b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 5
+  jumpForce: 3
   delayBeforeDisappear: 0.1
   groundLayer:
     serializedVersion: 2
@@ -1675,12 +1699,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 1796078400460694375}
     m_Modifications:
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.1722
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.611
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.832
+      value: -1.514
       objectReference: {fileID: 0}
     - target: {fileID: 1685257443165354363, guid: 7156a022a0c1541f4a7f760a28289c36, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1790,7 +1822,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8f749e7513f414592fd10d3908945b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 5
+  jumpForce: 3
   delayBeforeDisappear: 0.1
   groundLayer:
     serializedVersion: 2

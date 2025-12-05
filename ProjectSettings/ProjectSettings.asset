@@ -163,6 +163,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
+    Android: com.DefaultCompany.HideBalls
     Standalone: com.DefaultCompany.HideBalls
   buildNumber:
     Standalone: 0

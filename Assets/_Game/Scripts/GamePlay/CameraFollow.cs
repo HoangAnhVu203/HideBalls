@@ -1,53 +1,75 @@
+using System.Linq;
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public class CameraFollow : MonoBehaviour
 {
-    [Header("Target (ưu tiên kéo tay)")]
-    public Transform target;                 // Kéo Ball vào đây cho chắc
+    [Header("Target (Ball)")]
+    public Transform target;                
+    public string ballLayerName = "Ball";
 
-    [Header("Tự tìm theo Layer (dự phòng)")]
-    public string ballLayerName = "Ball";    // Tên layer của Ball
+    [Header("Offset khi FOLLOW ball")]
+    public Vector3 followOffset = new Vector3(0, 0, -10);
 
-    [Header("Offset")]
-    public Vector3 offset = new Vector3(0, 0, -10);
+    [Header("Vị trí camera MỚI mỗi lần LoadLevel")]
+    public Vector3 startPosition = new Vector3(0, 0, -10);
 
-    [Header("Dead Zone (vùng an toàn quanh tâm camera)")]
-    public float deadZoneWidth = 3f;
-    public float deadZoneHeight = 3f;
+    [Header("Dead Zone")]
+    public float deadZoneWidth = 3.5f;
+    public float deadZoneHeight = 10f;
 
     [Header("Smooth")]
-    public float smoothSpeed = 8f;
+    public float smoothSpeed = 5f;
 
-    [Header("Giới hạn camera (tuỳ chọn)")]
+    [Header("Clamp (optional)")]
     public bool useClamp = false;
     public Vector2 minPos;
     public Vector2 maxPos;
 
+    [Header("Chỉ 1 số level mới follow")]
+    public bool limitToSpecificLevels = false;
+    public int[] followLevelIndices;   // ví dụ: 29, 31, 53,...
+
     int ballLayer = -1;
+    int lastLevelIndex = int.MinValue;   // để phát hiện level mới
 
     void Awake()
     {
         ballLayer = LayerMask.NameToLayer(ballLayerName);
         if (ballLayer == -1)
-        {
-            Debug.LogWarning("[CameraSmartFollowBall] Không tìm thấy layer: " + ballLayerName);
-        }
+            Debug.LogWarning("[CameraFollow] Không tìm thấy layer: " + ballLayerName);
+
+        // Đảm bảo lúc bắt đầu đã ở đúng vị trí
+        ResetCameraForNewLevel();
     }
 
     void LateUpdate()
     {
-        // Nếu chưa có target (chưa kéo tay hoặc ball mới spawn) -> tự tìm
+        // 1) PHÁT HIỆN LOAD LEVEL MỚI → RESET CAMERA
+        if (LevelManager.Instance != null)
+        {
+            int curIndex = LevelManager.Instance.CurrentIndex;
+            if (curIndex != lastLevelIndex)
+            {
+                lastLevelIndex = curIndex;
+                ResetCameraForNewLevel();
+            }
+        }
+
+        // 2) Nếu level này không cho follow -> đứng yên tại startPosition
+        if (!CanFollowCurrentLevel())
+            return;
+
+        // 3) Follow ball nếu được phép
         if (target == null)
         {
             FindBallTarget();
-            if (target == null) return;  // vẫn chưa có thì thôi
+            if (target == null) return;
         }
 
-        // ====== LOGIC DEAD ZONE ======
         Vector3 camPos = transform.position;
 
-        // Vị trí ball + offset (giữ Z của camera)
-        Vector3 targetPos = target.position + offset;
+        Vector3 targetPos = target.position + followOffset;
         targetPos.z = camPos.z;
 
         float dx = targetPos.x - camPos.x;
@@ -56,37 +78,48 @@ public class CameraFollow : MonoBehaviour
         float halfDeadW = deadZoneWidth * 0.5f;
         float halfDeadH = deadZoneHeight * 0.5f;
 
-        // Nếu ball vượt ra ngoài vùng an toàn theo X
+        // chỉ di chuyển nếu ball ra khỏi dead zone
         if (Mathf.Abs(dx) > halfDeadW)
-        {
-            float moveX = dx - Mathf.Sign(dx) * halfDeadW;
-            camPos.x += moveX;
-        }
+            camPos.x += dx - Mathf.Sign(dx) * halfDeadW;
 
-        // Nếu muốn camera KHÔNG follow theo Y, comment đoạn dưới:
         if (Mathf.Abs(dy) > halfDeadH)
-        {
-            float moveY = dy - Mathf.Sign(dy) * halfDeadH;
-            camPos.y += moveY;
-        }
+            camPos.y += dy - Mathf.Sign(dy) * halfDeadH;
 
-        // Giới hạn trong map
         if (useClamp)
         {
             camPos.x = Mathf.Clamp(camPos.x, minPos.x, maxPos.x);
             camPos.y = Mathf.Clamp(camPos.y, minPos.y, maxPos.y);
         }
 
-        // Lerp cho mượt
         transform.position = Vector3.Lerp(transform.position, camPos, smoothSpeed * Time.deltaTime);
+    }
+
+    // ----------------- HELPER -----------------
+
+    void ResetCameraForNewLevel()
+    {
+        // mỗi lần level đổi: camera về vị trí start + clear target
+        transform.position = startPosition;
+        target = null;
+        // Debug
+        Debug.Log("[CameraFollow] Reset camera to " + startPosition + " (level changed)");
+    }
+
+    bool CanFollowCurrentLevel()
+    {
+        if (!limitToSpecificLevels) return true;
+
+        if (LevelManager.Instance == null ||
+            followLevelIndices == null ||
+            followLevelIndices.Length == 0)
+            return false;
+
+        int idx = LevelManager.Instance.CurrentIndex;
+        return followLevelIndices.Contains(idx);
     }
 
     void FindBallTarget()
     {
-        // Nếu bạn đã kéo target bằng tay → bỏ qua
-        if (target != null) return;
-
-        // Tự tìm theo layer Ball
         if (ballLayer == -1) return;
 
         GameObject[] all = FindObjectsOfType<GameObject>();
@@ -96,7 +129,7 @@ public class CameraFollow : MonoBehaviour
             if (go.layer == ballLayer)
             {
                 target = go.transform;
-                Debug.Log("[CameraSmartFollowBall] Found ball by layer: " + go.name);
+                Debug.Log("[CameraFollow] Found ball by layer: " + ballLayerName);
                 return;
             }
         }
@@ -105,9 +138,8 @@ public class CameraFollow : MonoBehaviour
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()
     {
-        // Vẽ vùng vàng để debug
         Gizmos.color = Color.yellow;
-        Vector3 center = Application.isPlaying ? transform.position : transform.position;
+        Vector3 center = transform.position;
         center.z = 0;
         Gizmos.DrawWireCube(center, new Vector3(deadZoneWidth, deadZoneHeight, 0));
     }

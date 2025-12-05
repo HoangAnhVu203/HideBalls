@@ -462,6 +462,10 @@ PrefabInstance:
       value: Block - U
       objectReference: {fileID: 0}
     - target: {fileID: 6498228823905488943, guid: 6693b2d87f4684e489d4029b49f08f95, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 6498228823905488943, guid: 6693b2d87f4684e489d4029b49f08f95, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}

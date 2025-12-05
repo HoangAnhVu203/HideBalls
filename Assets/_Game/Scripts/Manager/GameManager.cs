@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     // ================== STATE ==================
     public enum GameState
     {
-        Demo,       
+        Demo,
         Gameplay,
         Pause,
         Win,
@@ -20,20 +20,29 @@ public class GameManager : MonoBehaviour
     // ================== ENEMY / RAIN ==================
     [Header("Enemy Spawner")]
     [Tooltip("Component EnemySpawner dùng để mưa enemy")]
-    public EnemySpawner enemySpawner;          // script EnemySpawner
+    public EnemySpawner enemySpawner;
     [Tooltip("GameObject chứa EnemySpawner, sẽ bật / tắt khi mưa")]
-    public GameObject enemySpawnerGO;          // object bật tắt
+    public GameObject enemySpawnerGO;
     [Tooltip("Parent để chứa tất cả enemy spawn ra (để dễ clear)")]
-    public Transform enemyRoot;                // parent enemies
+    public Transform enemyRoot;
 
     [Header("Rain Settings")]
     [Tooltip("Thời gian chờ thêm sau khi mưa dừng rồi mới xét WIN / Replay demo")]
     public float surviveExtraTime = 3f;
 
-    int  totalBlocks;      // tổng số ClickFall trong level
-    int  fallenBlocks;     // số block đã click rơi
+    int totalBlocks;      // tổng số ClickFall trong level
+    int fallenBlocks;     // số block đã click rơi
     bool ballHit      = false;  // ball đã từng trúng enemy chưa
     bool rainFinished = false;
+
+    // ==== THUA KHI BÓNG RƠI QUÁ THẤP ====
+    [Header("Lose when ball falls too low")]
+    public bool enableFallLose = true;
+    [Tooltip("Nếu y của bóng < loseY thì thua")]
+    public float loseY = -5f;
+
+    // danh sách bóng trong level hiện tại (tự tìm trong SetupLevel)
+    Transform[] currentBalls;
 
     void Awake()
     {
@@ -48,7 +57,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // nghe sự kiện load level từ LevelManager
         if (LevelManager.Instance != null)
         {
             LevelManager.Instance.OnLevelLoaded += OnLevelLoaded;
@@ -59,7 +67,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // đảm bảo spawner tắt khi mới vào game
         if (enemySpawnerGO != null)
             enemySpawnerGO.SetActive(false);
     }
@@ -69,6 +76,15 @@ public class GameManager : MonoBehaviour
         if (LevelManager.Instance != null)
         {
             LevelManager.Instance.OnLevelLoaded -= OnLevelLoaded;
+        }
+    }
+
+    void Update()
+    {
+        // check rơi quá thấp chỉ áp dụng trong Gameplay thật
+        if (enableFallLose && CurrentState == GameState.Gameplay)
+        {
+            CheckBallFallOut();
         }
     }
 
@@ -92,28 +108,41 @@ public class GameManager : MonoBehaviour
 
         ClearAllEnemies();
 
+        // Tìm tất cả ClickFall (block) trong level
         ClickFall[] blocks = levelRoot.GetComponentsInChildren<ClickFall>(true);
         totalBlocks  = blocks.Length;
         fallenBlocks = 0;
 
-        Debug.Log($"[GameManager] Setup level – blocks: {totalBlocks}");
+        // ==== TÌM TẤT CẢ BÓNG (ClickFallSpine) TRONG LEVEL ====
+        var ballList = new System.Collections.Generic.List<Transform>();
+        var spineBalls = levelRoot.GetComponentsInChildren<ClickFallSpine>(true);
+        foreach (var b in spineBalls)
+        {
+            if (b != null)
+                ballList.Add(b.transform);
+        }
+        currentBalls = ballList.ToArray();
+
+        Debug.Log($"[GameManager] Setup level – blocks: {totalBlocks}, balls: {currentBalls.Length}");
 
         bool isDemoLevel = (LevelManager.Instance != null && LevelManager.Instance.CurrentIndex == 0);
 
         if (isDemoLevel)
         {
-            // ===== LEVEL DEMO =====
             SetState(GameState.Demo);
-            UIManager.Instance.OpenUI<PanelDemo>();      // hiện PanelDemo
+            UIManager.Instance.OpenUI<PanelDemo>();
         }
         else
         {
-            // ===== LEVEL THẬT =====
             SetState(GameState.Gameplay);
-            ShowCurrentLevel();                          // hiện "LEVEL X" trên CanvasGamePlay
+            ShowCurrentLevel();
+            var canvas = UIManager.Instance.GetUI<CanvasGamePlay>();
+            if (canvas != null)
+            {
+                canvas.ResetHintTimers();
+            }
         }
 
-        // cả demo lẫn gameplay: nếu không có block thì mưa luôn
         if (totalBlocks == 0)
             StartRain();
     }
@@ -135,10 +164,8 @@ public class GameManager : MonoBehaviour
 
     // ================== BLOCK EVENTS ==================
 
-    // Gọi từ ClickFall khi block bắt đầu rơi lần đầu tiên.
     public void NotifyBlockFallen(ClickFall block)
     {
-        // Cho phép cả Demo và Gameplay dùng chung luật
         if (CurrentState != GameState.Gameplay && CurrentState != GameState.Demo)
             return;
 
@@ -157,7 +184,6 @@ public class GameManager : MonoBehaviour
     {
         if (enemySpawnerGO == null || enemySpawner == null)
         {
-            Debug.LogWarning("[GameManager] Chưa gán EnemySpawner hoặc enemySpawnerGO");
             return;
         }
 
@@ -167,7 +193,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("[GameManager] Start rain");
     }
 
-    // GỌI từ EnemySpawner khi coroutine mưa kết thúc.
     public void OnRainFinished()
     {
         Debug.Log("[GameManager] Rain finished");
@@ -175,12 +200,10 @@ public class GameManager : MonoBehaviour
 
         if (CurrentState == GameState.Demo)
         {
-            // DEMO: chờ 3s rồi tự Replay lại level demo
             StartCoroutine(DemoAutoReplay());
             return;
         }
 
-        // GAMEPLAY THẬT: nếu không trúng enemy thì xét WIN
         if (!ballHit && CurrentState == GameState.Gameplay)
         {
             StartCoroutine(WaitAndCheckWin());
@@ -194,7 +217,7 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Demo)
         {
             Debug.Log("[GameManager] Demo auto replay");
-            RestartLevel();    // Replay lại chính level demo (index 0)
+            RestartLevel();
         }
     }
 
@@ -211,10 +234,8 @@ public class GameManager : MonoBehaviour
 
     // ================== BALL HIT ENEMY ==================
 
-    // GỌI từ Ball (ClickFallSpine / BallSpine) khi va chạm enemy.
     public void OnBallHitEnemy()
     {
-        // Trong Demo: bỏ qua, không Fail, chỉ cho xem hiệu ứng
         if (CurrentState == GameState.Demo)
             return;
 
@@ -223,6 +244,24 @@ public class GameManager : MonoBehaviour
 
         ballHit = true;
         SetState(GameState.Fail);
+    }
+
+    // ==== THUA KHI BÓNG RƠI QUÁ THẤP ====
+    void CheckBallFallOut()
+    {
+        if (currentBalls == null || currentBalls.Length == 0) return;
+
+        foreach (var t in currentBalls)
+        {
+            if (t == null) continue;
+
+            if (t.position.y < loseY)
+            {
+                Debug.Log("[GameManager] Ball fell below loseY => FAIL");
+                SetState(GameState.Fail);
+                return;
+            }
+        }
     }
 
     // ================== STATE & UI ==================
@@ -286,15 +325,10 @@ public class GameManager : MonoBehaviour
         LevelManager.Instance?.NextLevel();
     }
 
-    // =========== HÀM CHO PANEL DEMO GỌI ===========
-
-    // Gọi từ PanelDemo.OnClickPlay()
     public void StartRealGame()
     {
-        // Đóng panel demo
         UIManager.Instance.CloseUIDirectly<PanelDemo>();
 
-        // Bắt đầu chơi level thật đầu tiên (index 1)
         if (LevelManager.Instance != null)
         {
             LevelManager.Instance.LoadLevel(1);
@@ -304,8 +338,6 @@ public class GameManager : MonoBehaviour
     void ShowCurrentLevel()
     {
         if (LevelManager.Instance == null) return;
-
-        // Không show level text cho demo (index 0)
         if (LevelManager.Instance.CurrentIndex <= 0) return;
 
         var canvasUI = UIManager.Instance.GetUI<CanvasGamePlay>();

@@ -8,8 +8,8 @@ public class LevelManager : MonoBehaviour
     [Serializable]
     public class LevelEntry
     {
-        public string id;          // ID level (dùng cho LoadLevelById)
-        public GameObject prefab;  // Prefab level
+        public string id;         
+        public GameObject prefab;  
     }
 
     public static LevelManager Instance { get; private set; }
@@ -80,10 +80,9 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
-            // Không dùng saveProgress → coi như reset về demo
             PlayerPrefs.DeleteKey(PP_LEVEL_INDEX);
             PlayerPrefs.Save();
-            startIndex = 0;   // luôn bắt đầu từ level demo
+            startIndex = 0;   
         }
 
         startIndex = Mathf.Clamp(startIndex, 0, levels.Count - 1);
@@ -147,7 +146,6 @@ public class LevelManager : MonoBehaviour
 
         index = Mathf.Clamp(index, 0, levels.Count - 1);
 
-        // 0. Clear mọi VFX runtime (laser explosion, smoke, debris, ...)
         ClearRuntime();
 
         // 1. Huỷ level cũ
@@ -203,8 +201,5 @@ public class LevelManager : MonoBehaviour
                 Destroy(runtimeRoot.GetChild(i).gameObject);
             }
         }
-
-        // (tuỳ chọn) Nếu sau này bạn còn VFX không parent vào runtimeRoot
-        // có thể lọc theo tag/name tại đây.
     }
 }

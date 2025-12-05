@@ -421,13 +421,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   ballLayerName: Ball
-  offset: {x: 0, y: 0, z: -10}
+  followOffset: {x: 0, y: 0, z: -10}
+  startPosition: {x: 0, y: 0, z: -10}
   deadZoneWidth: 3.5
   deadZoneHeight: 10
   smoothSpeed: 5
   useClamp: 0
   minPos: {x: -5.5, y: 0}
   maxPos: {x: 5.5, y: 0}
+  limitToSpecificLevels: 1
+  followLevelIndices: 1d0000001e0000002e000000350000003b00000042000000490000005c0000004d000000
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -786,6 +789,8 @@ MonoBehaviour:
   enemySpawnerGO: {fileID: 2112094303}
   enemyRoot: {fileID: 489118518}
   surviveExtraTime: 3
+  enableFallLose: 1
+  loseY: -6
 --- !u!1 &1207848806
 GameObject:
   m_ObjectHideFlags: 0
@@ -1021,7 +1026,7 @@ MonoBehaviour:
   levelRoot: {fileID: 352906526}
   saveProgress: 1
   loopAtEnd: 0
-  defaultStartIndex: 0
+  defaultStartIndex: 1
   runtimeRoot: {fileID: 0}
 --- !u!4 &1207848808
 Transform:
@@ -1312,8 +1317,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 8172678628443225977, guid: 0b92b6a864d604a71a2a75ca58620482, type: 3}
   enemyRoot: {fileID: 489118518}
-  minX: -2
-  maxX: 2
+  minX: -4
+  maxX: 4
   spawnY: 6
   spawnInterval: 0.1
   rainDuration: 5

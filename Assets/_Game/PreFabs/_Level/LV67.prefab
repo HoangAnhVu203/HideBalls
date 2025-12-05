@@ -461,7 +461,7 @@ MonoBehaviour:
   spriteRenderer: {fileID: 0}
   maxAlpha: 1
   fadeSpeed: 8
-  activeColor: {r: 0.2, g: 0.85, b: 0.2, a: 1}
+  activeColor: {r: 0.98039216, g: 0.5803922, b: 0.22352941, a: 1}
   gravityScale: 1
   addRigidbodyIfMissing: 1
   highlightObject: {fileID: 0}
